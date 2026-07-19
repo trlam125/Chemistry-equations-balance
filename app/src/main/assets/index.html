@@ -1,0 +1,1239 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#115e59">
+  <title>Chemistry balance</title>
+  <style>
+    :root {
+      --primary: #0f766e;
+      --primary-dark: #115e59;
+      --primary-soft: #ccfbf1;
+      --accent: #f59e0b;
+      --bg: #f4f7f7;
+      --card: #ffffff;
+      --text: #16302d;
+      --muted: #64748b;
+      --line: #dbe7e5;
+      --danger: #b91c1c;
+      --success: #047857;
+      --shadow: 0 10px 30px rgba(15, 118, 110, .10);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { padding-bottom: max(18px, env(safe-area-inset-bottom)); }
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .app { max-width: 760px; margin: 0 auto; min-height: 100vh; }
+    .hero {
+      background: linear-gradient(145deg, var(--primary-dark), var(--primary));
+      padding: 24px 18px 74px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before, .hero::after { content: ""; position: absolute; border-radius: 999px; background: rgba(255,255,255,.08); }
+    .hero::before { width: 150px; height: 150px; right: -35px; top: -45px; }
+    .hero::after { width: 90px; height: 90px; left: -32px; bottom: -25px; }
+    .brand { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
+    .logo { width: 46px; height: 46px; overflow: hidden; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.35); border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,.16); flex: 0 0 auto; }
+    .logo img { width: 100%; height: 100%; display: block; object-fit: cover; }
+    .brand h1 { margin: 0; font-size: 22px; line-height: 1.2; }
+    .brand p { margin: 4px 0 0; color: #ccfbf1; font-size: 13px; }
+    .tabs { margin: -48px 14px 0; position: relative; z-index: 2; background: rgba(255,255,255,.96); border-radius: 18px; box-shadow: var(--shadow); padding: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .tab { border: 0; border-radius: 13px; padding: 12px 8px; background: transparent; color: var(--muted); font-weight: 700; }
+    .tab.active { background: var(--primary); color: white; box-shadow: 0 5px 15px rgba(15,118,110,.25); }
+    main { padding: 16px 14px 0; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .card { background: var(--card); border: 1px solid rgba(219,231,229,.85); border-radius: 20px; padding: 17px; box-shadow: 0 7px 24px rgba(22,48,45,.055); margin-bottom: 14px; }
+    .card h2 { margin: 0 0 6px; font-size: 18px; }
+    .sub { margin: 0 0 14px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .input-wrap { position: relative; }
+    textarea { width: 100%; min-height: 112px; resize: vertical; border: 1.5px solid var(--line); border-radius: 15px; padding: 14px; outline: none; color: var(--text); background: #fbfdfd; line-height: 1.5; }
+    textarea:focus, input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15,118,110,.10); }
+    .samples { display: flex; gap: 8px; overflow-x: auto; padding: 11px 0 4px; scrollbar-width: none; }
+    .samples::-webkit-scrollbar { display: none; }
+    .chip { flex: 0 0 auto; border: 1px solid #bfe5df; background: #f0fdfa; color: var(--primary-dark); border-radius: 999px; padding: 8px 11px; font-size: 12px; font-weight: 650; }
+    .primary-btn { width: 100%; border: 0; color: white; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 13px 16px; border-radius: 14px; font-weight: 800; margin-top: 13px; box-shadow: 0 7px 18px rgba(15,118,110,.22); }
+    .primary-btn:active { transform: translateY(1px); }
+    .result { display: none; }
+    .result.show { display: block; }
+    .equation-box { background: linear-gradient(135deg, #ecfdf5, #f0fdfa); border: 1px solid #a7f3d0; border-radius: 16px; padding: 18px 12px; text-align: center; font-weight: 850; font-size: 19px; overflow-x: auto; white-space: nowrap; }
+    .result-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 11px; }
+    .ghost-btn { border: 1px solid var(--line); background: white; color: var(--text); border-radius: 12px; padding: 10px; font-weight: 700; }
+    .section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .section-title h3 { margin: 0; font-size: 15px; }
+    .atom-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 7px; font-size: 13px; }
+    .atom-grid > div { padding: 8px 9px; border-bottom: 1px solid #edf3f2; }
+    .atom-grid .head { font-weight: 800; color: var(--muted); font-size: 11px; text-transform: uppercase; }
+    .ok { color: var(--success); font-weight: 800; }
+    .error-box { display: none; margin-top: 12px; background: #fef2f2; border: 1px solid #fecaca; color: var(--danger); border-radius: 13px; padding: 11px 12px; font-size: 13px; line-height: 1.45; }
+    .error-box.show { display: block; }
+    .history-list { display: grid; gap: 8px; }
+    .history-item { border: 1px solid var(--line); background: #fbfdfd; border-radius: 13px; padding: 11px; display: flex; align-items: center; gap: 10px; }
+    .history-eq { flex: 1; min-width: 0; font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tiny-btn { border: 0; background: var(--primary-soft); color: var(--primary-dark); width: 34px; height: 34px; border-radius: 10px; font-size: 16px; }
+    .empty { text-align: center; color: var(--muted); padding: 18px 8px; font-size: 13px; }
+    .clear-link { border: 0; background: transparent; color: var(--danger); font-size: 12px; font-weight: 700; }
+
+    .chat-card { padding: 0; overflow: hidden; }
+    .chat-head { padding: 15px 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 11px; }
+    .bot-avatar { width: 40px; height: 40px; border-radius: 13px; background: var(--primary-soft); display: grid; place-items: center; font-size: 21px; }
+    .chat-title { flex: 1; min-width: 0; }
+    .chat-head strong { display: block; }
+    .online { color: var(--success); font-size: 11px; margin-top: 2px; }
+    .online.offline { color: var(--muted); }
+    .online.error { color: var(--danger); }
+    .settings-btn { width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 12px; background: white; color: var(--primary-dark); font-size: 18px; }
+    .api-settings { display: none; padding: 13px 15px; border-bottom: 1px solid var(--line); background: #f8fbfb; }
+    .api-settings.show { display: block; }
+    .api-settings label { display: block; font-size: 12px; font-weight: 800; margin-bottom: 7px; }
+    .api-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+    .api-row input { min-width: 0; border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 11px; outline: none; }
+    .api-save { border: 0; border-radius: 12px; background: var(--primary); color: white; padding: 0 15px; font-weight: 800; }
+    .api-actions { display: flex; justify-content: space-between; margin-top: 8px; }
+    .link-btn { border: 0; background: transparent; color: var(--primary); padding: 2px 0; font-size: 11px; font-weight: 750; }
+    .danger-link { color: var(--danger); }
+    .api-settings p { margin: 8px 0 0; color: var(--muted); font-size: 10.5px; line-height: 1.45; }
+    .api-intro { color: var(--text) !important; font-size: 11.5px !important; font-weight: 750; }
+    .api-guide { margin-top: 10px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 13px; background: white; }
+    .api-guide strong { display: block; font-size: 11.5px; margin-bottom: 6px; }
+    .api-guide ol { margin: 0; padding-left: 19px; color: var(--muted); font-size: 10.5px; line-height: 1.55; }
+    .api-guide a { display: inline-block; margin-top: 8px; color: var(--primary); font-size: 10.5px; font-weight: 800; text-decoration: none; }
+    .api-guide .key-note { color: #92400e; margin-top: 7px; }
+    .typing .bubble { color: var(--muted); font-style: italic; }
+    .messages { height: 52vh; min-height: 340px; max-height: 560px; overflow-y: auto; padding: 16px; background: linear-gradient(#fbfdfd, #f6faf9); }
+    .message { display: flex; margin-bottom: 12px; }
+    .message.user { justify-content: flex-end; }
+    .bubble { max-width: 86%; padding: 11px 13px; border-radius: 16px; font-size: 13px; line-height: 1.52; white-space: pre-wrap; word-break: break-word; }
+    .bubble strong { font-weight: 850; }
+    .bubble em { font-style: italic; }
+    .bubble code { padding: 1px 5px; border-radius: 6px; background: #edf5f4; color: #134e4a; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .92em; }
+    .bubble pre { margin: 9px 0; padding: 10px 11px; overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: #f3f7f6; white-space: pre; }
+    .bubble pre code { padding: 0; background: transparent; color: inherit; }
+    .bubble .md-heading { display: inline-block; margin: 3px 0 1px; font-weight: 850; }
+    .bubble .md-h1 { font-size: 1.16em; }
+    .bubble .md-h2 { font-size: 1.10em; }
+    .bubble .md-h3 { font-size: 1.04em; }
+    .bot .bubble { background: white; border: 1px solid var(--line); border-top-left-radius: 5px; }
+    .user .bubble { background: var(--primary); color: white; border-top-right-radius: 5px; }
+    .quick-prompts { display: flex; gap: 7px; overflow-x: auto; padding: 10px 12px 5px; scrollbar-width: none; border-top: 1px solid var(--line); background: white; }
+    .quick-prompts::-webkit-scrollbar { display: none; }
+    .chat-input { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 8px 12px 12px; background: white; }
+    .chat-input input { width: 100%; border: 1.5px solid var(--line); border-radius: 14px; padding: 11px 12px; outline: none; }
+    .send { width: 44px; height: 44px; border: 0; border-radius: 14px; background: var(--primary); color: white; font-size: 18px; font-weight: 900; }
+    .note { margin: 0 2px 14px; color: var(--muted); font-size: 11px; text-align: center; }
+    .formula-sub { font-variant-numeric: tabular-nums; }
+    @media (min-width: 620px) {
+      .hero { border-radius: 0 0 28px 28px; }
+      .tabs { margin-left: 28px; margin-right: 28px; }
+      main { padding-left: 28px; padding-right: 28px; }
+      .messages { height: 56vh; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header class="hero">
+    <div class="brand">
+      <div class="logo"><img src="app_logo.png" alt="Biểu tượng Chemistry balance"></div>
+      <div>
+        <h1>Chemistry balance</h1>
+        <p>Giải số và ký hiệu · Gemini khi có mạng · Tự động ngoại tuyến</p>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="balance">⚖️ Cân bằng</button>
+    <button class="tab" data-tab="chat">💬 Trợ lý hóa học</button>
+  </nav>
+
+  <main>
+    <section id="balance" class="panel active">
+      <div class="card">
+        <h2>Nhập phương trình</h2>
+        <p class="sub">Dùng dấu <b>+</b> giữa các chất và <b>→</b>, <b>-></b> hoặc <b>=</b> giữa hai vế.</p>
+        <div class="input-wrap">
+          <textarea id="equationInput" spellcheck="false" placeholder="Ví dụ: Fe + O2 -> Fe2O3"></textarea>
+        </div>
+        <div class="samples">
+          <button class="chip" data-eq="Fe + O2 -> Fe2O3">Fe + O₂</button>
+          <button class="chip" data-eq="C2H6 + O2 -> CO2 + H2O">Đốt cháy C₂H₆</button>
+          <button class="chip" data-eq="KMnO4 + HCl -> KCl + MnCl2 + H2O + Cl2">KMnO₄ + HCl</button>
+          <button class="chip" data-eq="Al + H2SO4 -> Al2(SO4)3 + H2">Al + H₂SO₄</button>
+          <button class="chip" data-eq="CxHyOzNt + O2 -> CO2 + H2O + N2">CₓHᵧO𝓏Nₜ</button>
+        </div>
+        <button id="balanceBtn" class="primary-btn">Cân bằng phương trình</button>
+        <div id="errorBox" class="error-box"></div>
+      </div>
+
+      <div id="resultCard" class="card result">
+        <div class="section-title"><h3>Kết quả</h3><span class="ok">✓ Đã cân bằng</span></div>
+        <div id="balancedEquation" class="equation-box"></div>
+        <div class="result-actions">
+          <button id="copyBtn" class="ghost-btn">📋 Sao chép</button>
+          <button id="shareBtn" class="ghost-btn">↗ Chia sẻ</button>
+        </div>
+        <div style="height:14px"></div>
+        <div class="section-title"><h3>Kiểm tra số nguyên tử</h3><span class="sub" style="margin:0">Hai vế bằng nhau</span></div>
+        <div id="atomGrid" class="atom-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">
+          <h3>Lịch sử gần đây</h3>
+          <button id="clearHistory" class="clear-link">Xóa tất cả</button>
+        </div>
+        <div id="historyList" class="history-list"></div>
+      </div>
+      <p class="note">Hỗ trợ chỉ số ký hiệu như CxHyOzNt. Với biến trùng ký hiệu nguyên tố, hãy viết C_n hoặc C_{n}. Chưa hỗ trợ điện tích ion ở cuối công thức.</p>
+    </section>
+
+    <section id="chat" class="panel">
+      <div class="card chat-card">
+        <div class="chat-head">
+          <div class="bot-avatar">🧪</div>
+          <div class="chat-title"><strong>Trợ lý Hóa học</strong><div id="chatMode" class="online">● Đang kiểm tra chế độ...</div></div>
+          <button id="settingsToggle" class="settings-btn" aria-label="Cài đặt Gemini">⚙</button>
+        </div>
+        <div id="apiSettings" class="api-settings">
+          <label for="apiKeyInput">Gemini API key</label>
+          <div class="api-row">
+            <input id="apiKeyInput" type="password" placeholder="Dán API key của Google AI Studio">
+            <button id="saveApiKey" class="api-save">Lưu</button>
+          </div>
+          <div class="api-actions"><button id="toggleApiKey" class="link-btn">Hiện/ẩn khóa</button><button id="removeApiKey" class="link-btn danger-link">Xóa khóa</button></div>
+          <p class="api-intro">Hãy dán Google API key và kết nối mạng để dùng chatbot hiệu quả hơn.</p>
+          <div class="api-guide">
+            <strong>Hướng dẫn lấy Google API key</strong>
+            <ol>
+              <li>Mở trang Google AI Studio API Keys.</li>
+              <li>Đăng nhập tài khoản Google và chấp nhận điều khoản nếu được hỏi.</li>
+              <li>Nhấn <b>Create API key</b>, sau đó chọn hoặc tạo một Google Cloud project.</li>
+              <li>Sao chép khóa, quay lại ứng dụng, dán vào ô phía trên và nhấn <b>Lưu</b>.</li>
+            </ol>
+            <a href="https://aistudio.google.com/apikey">Mở Google AI Studio để lấy API key ↗</a>
+            <p class="key-note">Không chia sẻ API key cho người khác. Khóa được lưu cục bộ trên thiết bị này.</p>
+          </div>
+        </div>
+        <div id="messages" class="messages"></div>
+        <div class="quick-prompts">
+          <button class="chip prompt">Cách cân bằng?</button>
+          <button class="chip prompt">Hệ số và chỉ số khác gì?</button>
+          <button class="chip prompt">Các loại phản ứng</button>
+          <button class="chip prompt">Giải thích kết quả gần nhất</button>
+        </div>
+        <div class="chat-input">
+          <input id="chatInput" placeholder="Hỏi hoặc nhập một phương trình..." autocomplete="off">
+          <button id="sendBtn" class="send">➤</button>
+        </div>
+      </div>
+      <p class="note">Chế độ trực tuyến dùng Gemini API. Chế độ ngoại tuyến chỉ cung cấp kiến thức hóa học phổ thông và cân bằng cục bộ.</p>
+    </section>
+  </main>
+</div>
+
+<script>
+'use strict';
+
+// ---------- BigInt fraction arithmetic ----------
+function absBig(n) { return n < 0n ? -n : n; }
+function gcdBig(a, b) { a = absBig(a); b = absBig(b); while (b) { const t = a % b; a = b; b = t; } return a || 1n; }
+function lcmBig(a, b) { return absBig(a / gcdBig(a, b) * b); }
+class Frac {
+  constructor(n, d = 1n) {
+    if (d === 0n) throw new Error('Mẫu số bằng 0');
+    n = BigInt(n); d = BigInt(d);
+    if (d < 0n) { n = -n; d = -d; }
+    const g = gcdBig(n, d); this.n = n / g; this.d = d / g;
+  }
+  add(o) { o = asFrac(o); return new Frac(this.n * o.d + o.n * this.d, this.d * o.d); }
+  sub(o) { o = asFrac(o); return new Frac(this.n * o.d - o.n * this.d, this.d * o.d); }
+  mul(o) { o = asFrac(o); return new Frac(this.n * o.n, this.d * o.d); }
+  div(o) { o = asFrac(o); return new Frac(this.n * o.d, this.d * o.n); }
+  neg() { return new Frac(-this.n, this.d); }
+  isZero() { return this.n === 0n; }
+}
+function asFrac(x) { return x instanceof Frac ? x : new Frac(BigInt(x)); }
+
+// ---------- Symbolic polynomial arithmetic ----------
+const ZERO_FRAC = () => new Frac(0n);
+function monomialParts(key) {
+  if (!key) return {};
+  const out = {};
+  key.split('|').forEach(part => {
+    const [name, power] = part.split('^');
+    out[name] = Number(power || 1);
+  });
+  return out;
+}
+function monomialKey(parts) {
+  return Object.keys(parts).filter(k => parts[k] !== 0).sort().map(k => `${k}^${parts[k]}`).join('|');
+}
+function multiplyMonomialKeys(a, b) {
+  const parts = monomialParts(a);
+  Object.entries(monomialParts(b)).forEach(([name, power]) => { parts[name] = (parts[name] || 0) + power; });
+  return monomialKey(parts);
+}
+function monomialDisplay(key) {
+  if (!key) return '';
+  return Object.entries(monomialParts(key)).sort(([a], [b]) => a.localeCompare(b)).map(([name, power]) => power === 1 ? name : `${name}^${power}`).join('');
+}
+class SymPoly {
+  constructor(terms = new Map()) {
+    this.terms = new Map();
+    for (const [key, value] of terms) {
+      const f = asFrac(value);
+      if (!f.isZero()) this.terms.set(key, f);
+    }
+  }
+  static zero() { return new SymPoly(); }
+  static one() { return SymPoly.constant(1n); }
+  static constant(value) { const f = asFrac(value); return f.isZero() ? SymPoly.zero() : new SymPoly(new Map([['', f]])); }
+  static variable(name) { return new SymPoly(new Map([[`${name}^1`, new Frac(1n)]])); }
+  clone() { return new SymPoly(this.terms); }
+  isZero() { return this.terms.size === 0; }
+  isConstant() { return this.terms.size === 0 || (this.terms.size === 1 && this.terms.has('')); }
+  constantValue() { return this.terms.get('') || new Frac(0n); }
+  variables() {
+    const vars = new Set();
+    for (const key of this.terms.keys()) Object.keys(monomialParts(key)).forEach(v => vars.add(v));
+    return vars;
+  }
+  add(other) {
+    other = asPoly(other);
+    const out = new Map(this.terms);
+    for (const [key, value] of other.terms) {
+      const next = (out.get(key) || ZERO_FRAC()).add(value);
+      if (next.isZero()) out.delete(key); else out.set(key, next);
+    }
+    return new SymPoly(out);
+  }
+  sub(other) { return this.add(asPoly(other).neg()); }
+  neg() { return this.scale(new Frac(-1n)); }
+  scale(value) {
+    const f = asFrac(value);
+    if (f.isZero()) return SymPoly.zero();
+    return new SymPoly(new Map([...this.terms].map(([key, coeff]) => [key, coeff.mul(f)])));
+  }
+  divConstant(value) {
+    const f = asFrac(value);
+    if (f.isZero()) throw new Error('Không thể chia biểu thức cho 0');
+    return new SymPoly(new Map([...this.terms].map(([key, coeff]) => [key, coeff.div(f)])));
+  }
+  mul(other) {
+    other = asPoly(other);
+    if (this.isZero() || other.isZero()) return SymPoly.zero();
+    const out = new Map();
+    for (const [ka, ca] of this.terms) for (const [kb, cb] of other.terms) {
+      const key = multiplyMonomialKeys(ka, kb);
+      const next = (out.get(key) || ZERO_FRAC()).add(ca.mul(cb));
+      if (next.isZero()) out.delete(key); else out.set(key, next);
+    }
+    return new SymPoly(out);
+  }
+  sortedTerms() {
+    return [...this.terms].sort(([ka], [kb]) => {
+      const pa = Object.values(monomialParts(ka)).reduce((a, b) => a + b, 0);
+      const pb = Object.values(monomialParts(kb)).reduce((a, b) => a + b, 0);
+      return pb - pa || ka.localeCompare(kb);
+    });
+  }
+  leadingCoeff() { const terms = this.sortedTerms(); return terms.length ? terms[0][1] : new Frac(0n); }
+  toString() {
+    if (this.isZero()) return '0';
+    let out = '';
+    this.sortedTerms().forEach(([key, coeff], index) => {
+      const negative = coeff.n < 0n;
+      const absN = absBig(coeff.n);
+      const mono = monomialDisplay(key);
+      let body = '';
+      if (!mono || absN !== coeff.d) {
+        body += coeff.d === 1n ? String(absN) : `${absN}/${coeff.d}`;
+      }
+      body += mono;
+      if (index === 0) out += negative ? `-${body}` : body;
+      else out += negative ? ` - ${body}` : ` + ${body}`;
+    });
+    return out;
+  }
+}
+function asPoly(value) { return value instanceof SymPoly ? value : SymPoly.constant(value); }
+
+// ---------- Chemical formula parser ----------
+const ELEMENT_SYMBOLS = new Set(('H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og').split(/\s+/));
+
+function normalizeEquation(text) {
+  return text.trim()
+    .replace(/[⇌↔⟷]/g, '->')
+    .replace(/[→⟶]/g, '->')
+    .replace(/\s+/g, ' ');
+}
+
+function stripState(formula) {
+  return formula.trim().replace(/\((aq|s|l|g)\)$/i, '').trim();
+}
+
+function addPolyCount(target, source, multiplier = SymPoly.one()) {
+  Object.entries(source).forEach(([el, count]) => {
+    target[el] = (target[el] || SymPoly.zero()).add(asPoly(count).mul(multiplier));
+  });
+}
+
+function parseSubscriptAt(formula, start) {
+  let i = start;
+  if (i >= formula.length) return { value: SymPoly.one(), next: i, variables: new Set() };
+  if (/\d/.test(formula[i])) {
+    let digits = '';
+    while (i < formula.length && /\d/.test(formula[i])) digits += formula[i++];
+    return { value: SymPoly.constant(BigInt(digits)), next: i, variables: new Set() };
+  }
+  if (formula[i] === '_') {
+    i++;
+    let name = '';
+    if (formula[i] === '{') {
+      const end = formula.indexOf('}', i + 1);
+      if (end < 0) throw new Error(`Thiếu dấu } trong ${formula}`);
+      name = formula.slice(i + 1, end);
+      i = end + 1;
+    } else {
+      while (i < formula.length && /[a-z]/.test(formula[i])) name += formula[i++];
+    }
+    if (!/^[a-z][a-z0-9]*$/.test(name)) throw new Error(`Biến chỉ số không hợp lệ trong ${formula}`);
+    return { value: SymPoly.variable(name), next: i, variables: new Set([name]) };
+  }
+  if (/[a-z]/.test(formula[i])) {
+    let name = '';
+    while (i < formula.length && /[a-z]/.test(formula[i])) name += formula[i++];
+    return { value: SymPoly.variable(name), next: i, variables: new Set([name]) };
+  }
+  return { value: SymPoly.one(), next: i, variables: new Set() };
+}
+
+function parseSimpleFormulaGeneral(formula) {
+  const pairs = { ')': '(', ']': '[', '}': '{' };
+  const stack = [{ kind: null, counts: {} }];
+  const variables = new Set();
+  let i = 0;
+  while (i < formula.length) {
+    const ch = formula[i];
+    if (ch === '(' || ch === '[' || ch === '{') {
+      stack.push({ kind: ch, counts: {} }); i++; continue;
+    }
+    if (ch === ')' || ch === ']' || ch === '}') {
+      if (stack.length === 1 || stack[stack.length - 1].kind !== pairs[ch]) throw new Error(`Ngoặc không khớp trong ${formula}`);
+      const group = stack.pop().counts;
+      i++;
+      const sub = parseSubscriptAt(formula, i); i = sub.next;
+      sub.variables.forEach(v => variables.add(v));
+      addPolyCount(stack[stack.length - 1].counts, group, sub.value);
+      continue;
+    }
+    if (/[A-Z]/.test(ch)) {
+      let symbol = ch; i++;
+      if (i < formula.length && /[a-z]/.test(formula[i]) && ELEMENT_SYMBOLS.has(symbol + formula[i])) {
+        symbol += formula[i++];
+      }
+      if (!ELEMENT_SYMBOLS.has(symbol)) throw new Error(`Nguyên tố không hợp lệ: ${symbol}`);
+      const sub = parseSubscriptAt(formula, i); i = sub.next;
+      sub.variables.forEach(v => variables.add(v));
+      stack[stack.length - 1].counts[symbol] = (stack[stack.length - 1].counts[symbol] || SymPoly.zero()).add(sub.value);
+      continue;
+    }
+    throw new Error(`Ký tự “${ch}” không hợp lệ trong ${formula}`);
+  }
+  if (stack.length !== 1) throw new Error(`Thiếu dấu đóng ngoặc trong ${formula}`);
+  return { counts: stack[0].counts, variables };
+}
+
+function parseFormulaGeneral(raw) {
+  let formula = stripState(raw).replace(/\s/g, '');
+  formula = formula.replace(/^\d+/, '');
+  if (!formula) throw new Error('Có chất bị để trống');
+  const total = {};
+  const variables = new Set();
+  const hydrateParts = formula.split(/[·.]/);
+  hydrateParts.forEach(part => {
+    if (!part) throw new Error(`Công thức không hợp lệ: ${raw}`);
+    const m = part.match(/^(\d+)(.+)$/);
+    const multiplier = m ? SymPoly.constant(BigInt(m[1])) : SymPoly.one();
+    const body = m ? m[2] : part;
+    const parsed = parseSimpleFormulaGeneral(body);
+    parsed.variables.forEach(v => variables.add(v));
+    addPolyCount(total, parsed.counts, multiplier);
+  });
+  return { counts: total, variables };
+}
+
+function parseEquation(text) {
+  const normalized = normalizeEquation(text);
+  const pieces = normalized.split(/\s*(?:->|=)\s*/);
+  if (pieces.length !== 2 || !pieces[0] || !pieces[1]) throw new Error('Hãy nhập đủ hai vế, ví dụ: H2 + O2 -> H2O');
+  const splitSide = side => side.split(/\s*\+\s*/).map(s => s.trim()).filter(Boolean);
+  const reactants = splitSide(pieces[0]);
+  const products = splitSide(pieces[1]);
+  if (!reactants.length || !products.length) throw new Error('Mỗi vế phải có ít nhất một chất');
+  if (reactants.length + products.length > 16) throw new Error('Phương trình quá dài cho phiên bản hiện tại');
+  const compounds = [...reactants, ...products];
+  const general = compounds.map(parseFormulaGeneral);
+  const variables = new Set();
+  general.forEach(item => item.variables.forEach(v => variables.add(v)));
+  const symbolic = variables.size > 0;
+  const symbolicCompositions = general.map(item => item.counts);
+  const compositions = symbolic ? null : symbolicCompositions.map(comp => Object.fromEntries(Object.entries(comp).map(([el, p]) => {
+    const value = p.constantValue();
+    if (value.d !== 1n) throw new Error('Số nguyên tử phải là số nguyên');
+    return [el, Number(value.n)];
+  })));
+  const leftComps = symbolic ? symbolicCompositions : compositions;
+  const leftElements = new Set(reactants.flatMap((_, i) => Object.keys(leftComps[i])));
+  const rightElements = new Set(products.flatMap((_, i) => Object.keys(leftComps[reactants.length + i])));
+  const missingRight = [...leftElements].filter(e => !rightElements.has(e));
+  const missingLeft = [...rightElements].filter(e => !leftElements.has(e));
+  if (missingRight.length || missingLeft.length) {
+    let msg = 'Hai vế không chứa cùng tập nguyên tố.';
+    if (missingRight.length) msg += ` Thiếu ở vế phải: ${missingRight.join(', ')}.`;
+    if (missingLeft.length) msg += ` Thiếu ở vế trái: ${missingLeft.join(', ')}.`;
+    throw new Error(msg);
+  }
+  return { reactants, products, compounds, compositions, symbolicCompositions, symbolic, variables: [...variables].sort() };
+}
+
+// ---------- Basic reaction feasibility checks ----------
+class ReactionFeasibilityError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'ReactionFeasibilityError';
+  }
+}
+
+const METAL_ACTIVITY_ORDER = [
+  'Cs', 'Rb', 'K', 'Ba', 'Sr', 'Ca', 'Na', 'Li', 'Mg', 'Al', 'Mn', 'Zn',
+  'Cr', 'Fe', 'Co', 'Ni', 'Sn', 'Pb', 'H', 'Cu', 'Hg', 'Ag', 'Pd', 'Pt', 'Au'
+];
+const METAL_ACTIVITY_INDEX = new Map(METAL_ACTIVITY_ORDER.map((symbol, index) => [symbol, index]));
+const ACIDS = new Set(['HCl', 'HBr', 'HI', 'H2SO4', 'H3PO4', 'H2CO3', 'H2S', 'HNO3']);
+const OXIDIZING_ACIDS_WITHOUT_H2 = new Set(['HNO3']);
+const HALOGEN_ACTIVITY_INDEX = new Map(['F2', 'Cl2', 'Br2', 'I2'].map((formula, index) => [formula, index]));
+
+function plainFormula(raw) {
+  return stripState(raw).replace(/\s/g, '').replace(/^\d+/, '');
+}
+
+function pureElementSymbol(raw) {
+  const formula = plainFormula(raw);
+  return ELEMENT_SYMBOLS.has(formula) ? formula : null;
+}
+
+function validateReactionFeasibility(parsed) {
+  // Symbolic formulas and most reaction classes need conditions/data that the
+  // offline checker cannot infer. Only reject well-known impossible patterns.
+  if (parsed.symbolic) return;
+
+  const reactants = parsed.reactants.map(plainFormula);
+  const products = parsed.products.map(plainFormula);
+  const productHasHydrogen = products.includes('H2');
+
+  // Metal + acid -> salt + H2. Metals below hydrogen cannot release H2 from
+  // ordinary acids. Nitric acid is oxidizing and normally does not form H2.
+  if (productHasHydrogen) {
+    const metal = reactants.map(pureElementSymbol).find(symbol => symbol && METAL_ACTIVITY_INDEX.has(symbol));
+    const acid = reactants.find(formula => ACIDS.has(formula));
+    if (metal && acid) {
+      if (OXIDIZING_ACIDS_WITHOUT_H2.has(acid)) {
+        throw new ReactionFeasibilityError(`Phản ứng không xảy ra theo phương trình đã nhập: ${acid} là axit có tính oxi hóa và thông thường không tạo khí H2 khi tác dụng với kim loại.`);
+      }
+      if (METAL_ACTIVITY_INDEX.get(metal) > METAL_ACTIVITY_INDEX.get('H')) {
+        throw new ReactionFeasibilityError(`Phản ứng không xảy ra trong điều kiện thường: ${metal} đứng sau H trong dãy hoạt động hóa học nên không đẩy được H khỏi ${acid} để tạo H2.`);
+      }
+    }
+  }
+
+  // A + muối(B) -> muối(A) + B: A must be more active than B.
+  const reactantMetals = reactants.map(pureElementSymbol).filter(symbol => symbol && METAL_ACTIVITY_INDEX.has(symbol));
+  const productMetals = products.map(pureElementSymbol).filter(symbol => symbol && METAL_ACTIVITY_INDEX.has(symbol));
+  if (reactantMetals.length === 1 && productMetals.length === 1) {
+    const incoming = reactantMetals[0];
+    const displaced = productMetals[0];
+    if (incoming !== displaced && METAL_ACTIVITY_INDEX.get(incoming) > METAL_ACTIVITY_INDEX.get(displaced)) {
+      throw new ReactionFeasibilityError(`Phản ứng thế không xảy ra: ${incoming} kém hoạt động hơn ${displaced} nên không thể đẩy ${displaced} ra khỏi hợp chất của nó.`);
+    }
+  }
+
+  // Halogen displacement: F2 > Cl2 > Br2 > I2.
+  const reactantHalogen = reactants.find(formula => HALOGEN_ACTIVITY_INDEX.has(formula));
+  const productHalogen = products.find(formula => HALOGEN_ACTIVITY_INDEX.has(formula));
+  if (reactantHalogen && productHalogen &&
+      HALOGEN_ACTIVITY_INDEX.get(reactantHalogen) > HALOGEN_ACTIVITY_INDEX.get(productHalogen)) {
+    throw new ReactionFeasibilityError(`Phản ứng thế halogen không xảy ra: ${reactantHalogen} kém hoạt động hơn ${productHalogen}.`);
+  }
+}
+
+// ---------- Numeric RREF/null-space balancer ----------
+function rref(matrix) {
+  const a = matrix.map(row => row.map(v => new Frac(v.n, v.d)));
+  const rows = a.length, cols = a[0].length;
+  const pivots = [];
+  let r = 0;
+  for (let c = 0; c < cols && r < rows; c++) {
+    let pivot = r;
+    while (pivot < rows && a[pivot][c].isZero()) pivot++;
+    if (pivot === rows) continue;
+    [a[r], a[pivot]] = [a[pivot], a[r]];
+    const div = a[r][c];
+    for (let j = c; j < cols; j++) a[r][j] = a[r][j].div(div);
+    for (let i = 0; i < rows; i++) {
+      if (i === r || a[i][c].isZero()) continue;
+      const factor = a[i][c];
+      for (let j = c; j < cols; j++) a[i][j] = a[i][j].sub(factor.mul(a[r][j]));
+    }
+    pivots.push(c); r++;
+  }
+  return { a, pivots };
+}
+
+function vectorToPositiveIntegers(vector) {
+  let common = 1n;
+  vector.forEach(v => { common = lcmBig(common, v.d); });
+  let ints = vector.map(v => v.n * (common / v.d));
+  if (ints.every(x => x < 0n)) ints = ints.map(x => -x);
+  if (ints.some(x => x <= 0n)) return null;
+  let g = ints.reduce((acc, x) => gcdBig(acc, x), 0n);
+  ints = ints.map(x => x / g);
+  return ints;
+}
+
+function enumerateAssignments(count, maxValue, callback, current = []) {
+  if (current.length === count) return callback(current.slice());
+  for (let v = 1; v <= maxValue; v++) {
+    current.push(BigInt(v));
+    if (enumerateAssignments(count, maxValue, callback, current)) return true;
+    current.pop();
+  }
+  return false;
+}
+
+function solveNullspace(matrix) {
+  const { a, pivots } = rref(matrix);
+  const cols = matrix[0].length;
+  const pivotSet = new Set(pivots);
+  const free = [];
+  for (let c = 0; c < cols; c++) if (!pivotSet.has(c)) free.push(c);
+  if (!free.length) throw new Error('Không tìm thấy nghiệm cân bằng khác 0');
+  if (free.length > 4) throw new Error('Phương trình có quá nhiều nghiệm tự do; hãy viết rõ sản phẩm/phản ứng mong muốn');
+
+  let best = null;
+  const tryAssignment = values => {
+    const x = Array.from({ length: cols }, () => new Frac(0n));
+    free.forEach((col, i) => { x[col] = new Frac(values[i]); });
+    for (let i = pivots.length - 1; i >= 0; i--) {
+      const pc = pivots[i];
+      let sum = new Frac(0n);
+      for (const fc of free) sum = sum.add(a[i][fc].mul(x[fc]));
+      x[pc] = sum.neg();
+    }
+    const ints = vectorToPositiveIntegers(x);
+    if (!ints) return false;
+    const score = ints.reduce((s, v) => s + v, 0n);
+    if (!best || score < best.score) best = { coeffs: ints, score };
+    return false;
+  };
+
+  enumerateAssignments(free.length, 8, tryAssignment);
+  if (!best) throw new Error('Không tìm được bộ hệ số nguyên dương. Kiểm tra lại công thức hoặc sản phẩm phản ứng');
+  return best.coeffs;
+}
+
+// ---------- Symbolic RREF/null-space balancer ----------
+function symbolicRref(matrix) {
+  const a = matrix.map(row => row.map(v => v.clone()));
+  const rows = a.length, cols = a[0].length;
+  const pivots = [];
+  const usedCols = new Set();
+  let r = 0;
+  while (r < rows) {
+    let choice = null;
+    for (let i = r; i < rows; i++) {
+      for (let c = 0; c < cols; c++) {
+        if (usedCols.has(c) || a[i][c].isZero() || !a[i][c].isConstant()) continue;
+        const f = a[i][c].constantValue();
+        const score = Number(absBig(f.n)) / Number(f.d);
+        if (!choice || score < choice.score) choice = { i, c, score };
+      }
+    }
+    if (!choice) break;
+    [a[r], a[choice.i]] = [a[choice.i], a[r]];
+    const pivot = a[r][choice.c].constantValue();
+    for (let j = 0; j < cols; j++) a[r][j] = a[r][j].divConstant(pivot);
+    for (let i = 0; i < rows; i++) {
+      if (i === r || a[i][choice.c].isZero()) continue;
+      const factor = a[i][choice.c];
+      for (let j = 0; j < cols; j++) a[i][j] = a[i][j].sub(factor.mul(a[r][j]));
+    }
+    pivots.push(choice.c); usedCols.add(choice.c); r++;
+  }
+  const unresolved = a.slice(r).some(row => row.some(cell => !cell.isZero()));
+  if (unresolved) throw new Error('Phương trình ký hiệu này quá phức tạp. Hãy viết sản phẩm có công thức cố định hoặc thay biến bằng giá trị cụ thể');
+  return { a, pivots };
+}
+
+function scaleSymbolicVectorToIntegers(vector) {
+  let common = 1n;
+  vector.forEach(poly => poly.terms.forEach(coeff => { common = lcmBig(common, coeff.d); }));
+  let scaled = vector.map(poly => poly.scale(new Frac(common)));
+  const allNums = [];
+  scaled.forEach(poly => poly.terms.forEach(coeff => allNums.push(absBig(coeff.n))));
+  let g = allNums.reduce((acc, n) => gcdBig(acc, n), 0n) || 1n;
+  scaled = scaled.map(poly => poly.divConstant(new Frac(g)));
+  const first = scaled.find(poly => !poly.isZero());
+  if (first && first.leadingCoeff().n < 0n) scaled = scaled.map(poly => poly.neg());
+  if (scaled.some(poly => poly.isZero())) throw new Error('Có chất nhận hệ số 0; hãy kiểm tra lại phương trình');
+  return scaled;
+}
+
+function solveSymbolicNullspace(matrix) {
+  const { a, pivots } = symbolicRref(matrix);
+  const cols = matrix[0].length;
+  const pivotSet = new Set(pivots);
+  const free = [];
+  for (let c = 0; c < cols; c++) if (!pivotSet.has(c)) free.push(c);
+  if (free.length !== 1) throw new Error('Phương trình ký hiệu phải có đúng một hệ số tự do để cho kết quả duy nhất');
+  const x = Array.from({ length: cols }, () => SymPoly.zero());
+  x[free[0]] = SymPoly.one();
+  for (let i = pivots.length - 1; i >= 0; i--) {
+    const pc = pivots[i];
+    let sum = SymPoly.zero();
+    for (const fc of free) sum = sum.add(a[i][fc].mul(x[fc]));
+    x[pc] = sum.neg();
+  }
+  return scaleSymbolicVectorToIntegers(x);
+}
+
+function scanFormulaForDisplay(formula) {
+  const state = formula.match(/\((aq|s|l|g)\)$/i);
+  const base = formula.replace(/\((aq|s|l|g)\)$/i, '');
+  let html = '', i = 0;
+  while (i < base.length) {
+    const ch = base[i];
+    if (/[A-Z]/.test(ch)) {
+      let symbol = ch; i++;
+      if (i < base.length && /[a-z]/.test(base[i]) && ELEMENT_SYMBOLS.has(symbol + base[i])) symbol += base[i++];
+      html += symbol;
+      const sub = parseSubscriptAt(base, i); i = sub.next;
+      const subText = sub.value.toString();
+      if (subText !== '1') html += `<sub>${escapeHtml(subText)}</sub>`;
+    } else if (ch === ')' || ch === ']' || ch === '}') {
+      html += ch; i++;
+      const sub = parseSubscriptAt(base, i); i = sub.next;
+      const subText = sub.value.toString();
+      if (subText !== '1') html += `<sub>${escapeHtml(subText)}</sub>`;
+    } else {
+      html += escapeHtml(ch); i++;
+    }
+  }
+  return html + (state ? `<span style="font-size:.72em">${state[0]}</span>` : '');
+}
+
+function formatFormula(formula) {
+  try { return scanFormulaForDisplay(formula); }
+  catch { return escapeHtml(formula).replace(/(\d+)/g, '<sub>$1</sub>'); }
+}
+
+function coefficientText(c) {
+  if (typeof c === 'bigint') return c === 1n ? '' : String(c);
+  const text = c.toString();
+  if (text === '1') return '';
+  const needsParens = /\s[+-]\s/.test(text);
+  return `${needsParens ? `(${text})` : text} `;
+}
+
+function formatBalanced(parsed, coeffs, html = true) {
+  const make = (name, c) => coefficientText(c) + (html ? formatFormula(name) : name);
+  const left = parsed.reactants.map((x, i) => make(x, coeffs[i])).join(' + ');
+  const offset = parsed.reactants.length;
+  const right = parsed.products.map((x, i) => make(x, coeffs[offset + i])).join(' + ');
+  return `${left} → ${right}`;
+}
+
+function countAtomsNumeric(parsed, coeffs) {
+  const left = {}, right = {};
+  parsed.compositions.forEach((comp, i) => {
+    const target = i < parsed.reactants.length ? left : right;
+    Object.entries(comp).forEach(([el, count]) => {
+      target[el] = (target[el] || 0n) + BigInt(count) * coeffs[i];
+    });
+  });
+  return { left, right };
+}
+
+function countAtomsSymbolic(parsed, coeffs) {
+  const left = {}, right = {};
+  parsed.symbolicCompositions.forEach((comp, i) => {
+    const target = i < parsed.reactants.length ? left : right;
+    Object.entries(comp).forEach(([el, count]) => {
+      target[el] = (target[el] || SymPoly.zero()).add(count.mul(coeffs[i]));
+    });
+  });
+  return { left, right };
+}
+
+function balanceChemicalEquation(text) {
+  const parsed = parseEquation(text);
+  validateReactionFeasibility(parsed);
+  const sourceComps = parsed.symbolic ? parsed.symbolicCompositions : parsed.compositions;
+  const elements = [...new Set(sourceComps.flatMap(c => Object.keys(c)))].sort();
+  let coeffs, atoms;
+  if (parsed.symbolic) {
+    const matrix = elements.map(el => parsed.symbolicCompositions.map((comp, i) => {
+      const sign = i < parsed.reactants.length ? 1n : -1n;
+      return (comp[el] || SymPoly.zero()).scale(new Frac(sign));
+    }));
+    coeffs = solveSymbolicNullspace(matrix);
+    atoms = countAtomsSymbolic(parsed, coeffs);
+  } else {
+    const matrix = elements.map(el => parsed.compositions.map((comp, i) => {
+      const sign = i < parsed.reactants.length ? 1n : -1n;
+      return new Frac(BigInt(comp[el] || 0) * sign);
+    }));
+
+    // If atom conservation leaves more than one genuinely independent solution,
+    // choosing the smallest positive vector can produce a mathematically balanced
+    // but chemically misleading redox equation. Duplicate molecular formulas
+    // (for example glucose + fructose written with the same formula) account for
+    // harmless extra null-space dimensions, so discount those before rejecting.
+    const rankInfo = rref(matrix);
+    const nullity = parsed.compounds.length - rankInfo.pivots.length;
+    const normalizedCompounds = parsed.compounds.map(plainFormula);
+    const duplicateRedundancy = normalizedCompounds.length - new Set(normalizedCompounds).size;
+    if (nullity - duplicateRedundancy > 1) {
+      throw new Error('Phương trình có nhiều bộ hệ số cùng bảo toàn nguyên tử. Đây thường là phản ứng oxi hóa-khử hoặc có phản ứng phụ; chỉ cân bằng nguyên tử không đủ để xác định nghiệm hóa học duy nhất. Hãy ghi rõ môi trường/điều kiện hoặc hỏi chatbot trực tuyến.');
+    }
+
+    coeffs = solveNullspace(matrix);
+    atoms = countAtomsNumeric(parsed, coeffs);
+  }
+  return {
+    parsed, coeffs, atoms, elements, symbolic: parsed.symbolic,
+    html: formatBalanced(parsed, coeffs, true),
+    text: formatBalanced(parsed, coeffs, false)
+  };
+}
+
+
+// ---------- UI ----------
+const equationInput = document.getElementById('equationInput');
+const balanceBtn = document.getElementById('balanceBtn');
+const resultCard = document.getElementById('resultCard');
+const balancedEquation = document.getElementById('balancedEquation');
+const atomGrid = document.getElementById('atomGrid');
+const errorBox = document.getElementById('errorBox');
+const historyList = document.getElementById('historyList');
+let lastResult = null;
+
+function setError(message = '') {
+  errorBox.textContent = message;
+  errorBox.classList.toggle('show', Boolean(message));
+}
+
+function performBalance(inputText, scroll = true) {
+  setError('');
+  try {
+    const result = balanceChemicalEquation(inputText);
+    lastResult = result;
+    balancedEquation.innerHTML = result.html;
+    atomGrid.innerHTML = '<div class="head">Nguyên tố</div><div class="head">Vế trái</div><div class="head">Vế phải</div>' +
+      result.elements.map(el => `<div><b>${el}</b></div><div>${result.atoms.left[el]}</div><div class="ok">${result.atoms.right[el]} ✓</div>`).join('');
+    resultCard.classList.add('show');
+    saveHistory(result.text);
+    renderHistory();
+    if (scroll) setTimeout(() => resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+    return result;
+  } catch (err) {
+    resultCard.classList.remove('show');
+    setError(err.message || 'Không thể cân bằng phương trình này');
+    return null;
+  }
+}
+
+balanceBtn.addEventListener('click', () => performBalance(equationInput.value));
+equationInput.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') performBalance(equationInput.value);
+});
+document.querySelectorAll('[data-eq]').forEach(btn => btn.addEventListener('click', () => {
+  equationInput.value = btn.dataset.eq; performBalance(btn.dataset.eq, false);
+}));
+
+function fallbackCopy(text) {
+  const area = document.createElement('textarea');
+  area.value = text;
+  area.style.position = 'fixed';
+  area.style.opacity = '0';
+  document.body.appendChild(area);
+  area.focus(); area.select();
+  const ok = document.execCommand('copy');
+  area.remove();
+  if (window.Android && Android.toast) Android.toast(ok ? 'Đã sao chép' : 'Không thể sao chép');
+  else if (!ok) window.prompt('Sao chép phương trình:', text);
+}
+document.getElementById('copyBtn').addEventListener('click', () => {
+  if (!lastResult) return;
+  if (window.Android && Android.copyText) Android.copyText(lastResult.text);
+  else fallbackCopy(lastResult.text);
+});
+document.getElementById('shareBtn').addEventListener('click', () => {
+  if (!lastResult) return;
+  if (window.Android && Android.shareText) Android.shareText(lastResult.text);
+  else if (navigator.share) navigator.share({ text: lastResult.text }).catch(() => {});
+  else fallbackCopy(lastResult.text);
+});
+
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem('chem_history') || '[]'); } catch { return []; }
+}
+function saveHistory(eq) {
+  const list = getHistory().filter(x => x !== eq);
+  list.unshift(eq);
+  localStorage.setItem('chem_history', JSON.stringify(list.slice(0, 10)));
+}
+function renderHistory() {
+  const list = getHistory();
+  if (!list.length) { historyList.innerHTML = '<div class="empty">Chưa có phương trình nào được lưu.</div>'; return; }
+  historyList.innerHTML = list.map((eq, i) => `<div class="history-item"><div class="history-eq">${escapeHtml(eq)}</div><button class="tiny-btn" data-history="${i}" title="Dùng lại">↺</button></div>`).join('');
+  document.querySelectorAll('[data-history]').forEach(btn => btn.addEventListener('click', () => {
+    const eq = getHistory()[Number(btn.dataset.history)];
+    equationInput.value = eq.replace('→', '->');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }));
+}
+document.getElementById('clearHistory').addEventListener('click', () => {
+  localStorage.removeItem('chem_history'); renderHistory();
+});
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// Chuyển một tập con Markdown thường gặp của Gemini sang HTML an toàn.
+// Nội dung được escape trước khi gắn vào DOM. Bộ xử lý cũng loại bỏ các dấu
+// Markdown bị bỏ dở khi phản hồi mạng bị ngắt, nên người dùng không còn thấy
+// các chuỗi như **Y học và ở cuối tin nhắn.
+function renderInlineMarkdown(source) {
+  let html = source;
+  html = html.replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/__([^_\n]+?)__/g, '<strong>$1</strong>');
+  html = html.replace(/(^|[^*])\*([^*\n]+?)\*(?!\*)/g, '$1<em>$2</em>');
+  html = html.replace(/(^|[^_])_([^_\n]+?)_(?!_)/g, '$1<em>$2</em>');
+
+  // Sau khi các cặp hợp lệ đã được chuyển đổi, phần còn lại là marker bị lẻ.
+  // Xóa chúng thay vì hiển thị ký tự ** hoặc __ thô trên giao diện.
+  html = html.replace(/\*\*/g, '').replace(/__/g, '');
+  return html;
+}
+
+function renderMarkdown(text) {
+  const codeBlocks = [];
+  const inlineCodes = [];
+  let source = String(text ?? '').replace(/\r\n?/g, '\n');
+
+  source = source.replace(/```[^\n]*\n?([\s\S]*?)```/g, (_, code) => {
+    const token = `@@CODEBLOCK${codeBlocks.length}TOKEN@@`;
+    codeBlocks.push(`<pre><code>${escapeHtml(code.replace(/\n$/, ''))}</code></pre>`);
+    return token;
+  });
+  source = source.replace(/`([^`\n]+)`/g, (_, code) => {
+    const token = `@@INLINECODE${inlineCodes.length}TOKEN@@`;
+    inlineCodes.push(`<code>${escapeHtml(code)}</code>`);
+    return token;
+  });
+
+  const lines = escapeHtml(source).split('\n');
+  const rendered = lines.map(line => {
+    let match = line.match(/^###\s+(.+)$/);
+    if (match) return `<span class="md-heading md-h3">${renderInlineMarkdown(match[1])}</span>`;
+    match = line.match(/^##\s+(.+)$/);
+    if (match) return `<span class="md-heading md-h2">${renderInlineMarkdown(match[1])}</span>`;
+    match = line.match(/^#\s+(.+)$/);
+    if (match) return `<span class="md-heading md-h1">${renderInlineMarkdown(match[1])}</span>`;
+
+    // Hiển thị gạch đầu dòng ổn định ngay cả khi Gemini dùng "*" hoặc "-".
+    match = line.match(/^\s*[-*+]\s+(.+)$/);
+    if (match) return `• ${renderInlineMarkdown(match[1])}`;
+
+    return renderInlineMarkdown(line);
+  });
+
+  let html = rendered.join('\n');
+  codeBlocks.forEach((block, index) => {
+    html = html.replace(`@@CODEBLOCK${index}TOKEN@@`, block);
+  });
+  inlineCodes.forEach((code, index) => {
+    html = html.replace(`@@INLINECODE${index}TOKEN@@`, code);
+  });
+  return html;
+}
+
+// ---------- Tabs ----------
+document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === tab));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === tab.dataset.tab));
+}));
+
+// ---------- Hybrid chemistry assistant: Gemini online / local offline ----------
+const messages = document.getElementById('messages');
+const chatInput = document.getElementById('chatInput');
+const chatMode = document.getElementById('chatMode');
+const apiSettings = document.getElementById('apiSettings');
+const apiKeyInput = document.getElementById('apiKeyInput');
+const GEMINI_MODELS = ['gemini-3.5-flash', 'gemini-2.5-flash'];
+const chatHistory = [];
+
+function addMessage(text, who = 'bot', extraClass = '') {
+  const div = document.createElement('div');
+  div.className = `message ${who} ${extraClass}`.trim();
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  if (who === 'bot' && extraClass !== 'typing') bubble.innerHTML = renderMarkdown(text);
+  else bubble.textContent = text;
+  div.appendChild(bubble); messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+  return div;
+}
+
+function getApiKey() { return localStorage.getItem('gemini_api_key') || ''; }
+function setChatMode(message, kind = '') {
+  chatMode.textContent = message;
+  chatMode.className = `online ${kind}`.trim();
+}
+function refreshChatMode() {
+  const hasKey = Boolean(getApiKey());
+  if (navigator.onLine && hasKey) setChatMode('● Gemini trực tuyến · tự động dự phòng offline');
+  else if (!navigator.onLine) setChatMode('● Ngoại tuyến · thiết bị không có mạng', 'offline');
+  else setChatMode('● Ngoại tuyến · chưa thiết lập API key', 'offline');
+}
+
+function containsEquation(text) {
+  return /(?:->|→|=)/.test(text) && /[A-Z][a-z]?\d*/.test(text);
+}
+function normalizeQuestion(s) {
+  return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
+}
+function explainLast() {
+  if (!lastResult) return 'Bạn chưa cân bằng phương trình nào. Hãy nhập một phương trình ở tab Cân bằng hoặc gửi trực tiếp tại đây.';
+  const rows = lastResult.elements.map(el => `${el}: ${lastResult.atoms.left[el]} nguyên tử ở mỗi vế`).join('\n');
+  const symbolicNote = lastResult.symbolic ? '\n\nĐây là nghiệm ký hiệu. Các biến chỉ số được xem là số nguyên dương và giá trị thực tế phải làm cho mọi hệ số của phương trình dương.' : '';
+  return `Kết quả gần nhất:\n${lastResult.text}\n\nCác hệ số được chọn sao cho số nguyên tử mỗi nguyên tố được bảo toàn:\n${rows}\n\nLưu ý: chỉ thay đổi hệ số đứng trước chất, không thay đổi chỉ số trong công thức.${symbolicNote}`;
+}
+function offlineBotReply(text) {
+  const q = normalizeQuestion(text.trim());
+  if (!q) return 'Bạn hãy nhập câu hỏi hoặc một phương trình hóa học.';
+  if (containsEquation(text)) {
+    try {
+      const r = balanceChemicalEquation(text);
+      lastResult = r; saveHistory(r.text); renderHistory();
+      const atoms = r.elements.map(el => `${el}: ${r.atoms.left[el]} = ${r.atoms.right[el]}`).join(', ');
+      const note = r.symbolic ? '\n\nCác biến chỉ số được hiểu là số nguyên dương; hãy kiểm tra điều kiện để tất cả hệ số đều dương.' : '';
+      return `Phương trình cân bằng:\n${r.text}\n\nKiểm tra nguyên tử: ${atoms}.${note}`;
+    } catch (e) { return `Tôi chưa cân bằng được: ${e.message}`; }
+  }
+  if (/xin chao|hello|chao ban|hi\b/.test(q)) return 'Chào bạn! Tôi có thể cân bằng phương trình số hoặc ký hiệu, giải thích hệ số, định luật bảo toàn khối lượng và các dạng phản ứng hóa học phổ thông.';
+  if (/cach can bang|lam sao.*can bang|phuong phap can bang/.test(q)) return 'Cách cân bằng cơ bản:\n1. Viết đúng công thức các chất.\n2. Đếm số nguyên tử từng nguyên tố ở hai vế.\n3. Đặt hệ số trước công thức để số nguyên tử bằng nhau.\n4. Rút gọn về bộ số nguyên dương nhỏ nhất.\n5. Kiểm tra lại toàn bộ nguyên tố.\n\nKhông được sửa chỉ số nhỏ trong công thức hóa học.';
+  if (/he so.*chi so|chi so.*he so|khac gi/.test(q)) return 'Hệ số đứng trước công thức và nhân toàn bộ số nguyên tử của chất, ví dụ 2H₂O có 4 H và 2 O. Chỉ số nằm trong công thức và xác định thành phần một phân tử, ví dụ H₂O luôn có 2 H và 1 O. Khi cân bằng chỉ thay hệ số, không thay chỉ số.';
+  if (/bao toan|dinh luat/.test(q)) return 'Định luật bảo toàn khối lượng cho biết tổng khối lượng chất tham gia bằng tổng khối lượng sản phẩm. Ở mức nguyên tử, số nguyên tử của mỗi nguyên tố phải bằng nhau ở hai vế phương trình.';
+  if (/loai phan ung|dang phan ung/.test(q)) return 'Một số dạng thường gặp:\n• Hóa hợp: A + B → AB\n• Phân hủy: AB → A + B\n• Thế: A + BC → AC + B\n• Trao đổi: AB + CD → AD + CB\n• Cháy: chất + O₂ → oxit; hiđrocacbon thường tạo CO₂ và H₂O\n• Oxi hóa – khử: có sự thay đổi số oxi hóa.';
+  if (/oxi hoa|khu|so oxi hoa/.test(q)) return 'Phản ứng oxi hóa – khử có sự chuyển electron và thay đổi số oxi hóa. Chất khử nhường electron và bị oxi hóa; chất oxi hóa nhận electron và bị khử. Với bài phức tạp, nên dùng phương pháp thăng bằng electron hoặc ion–electron.';
+  if (/gan nhat|ket qua|giai thich/.test(q)) return explainLast();
+  if (/ho tro gi|lam duoc gi/.test(q)) return 'Tôi có thể: cân bằng phương trình số và phương trình có chỉ số ký hiệu như CxHyOzNt, giải thích kết quả gần nhất, phân biệt hệ số với chỉ số, định luật bảo toàn và các loại phản ứng.';
+  if (/cam on|thanks/.test(q)) return 'Không có gì! Bạn có thể gửi tiếp một phương trình, ví dụ: Fe + O2 -> Fe2O3.';
+  return 'Tôi chưa hiểu rõ câu hỏi đó trong chế độ ngoại tuyến. Bạn có thể hỏi về cách cân bằng, hệ số và chỉ số, định luật bảo toàn, các loại phản ứng hoặc gửi trực tiếp một phương trình.';
+}
+
+function buildGeminiPrompt(text) {
+  let localHint = '';
+  if (containsEquation(text)) {
+    try {
+      const r = balanceChemicalEquation(text);
+      lastResult = r; saveHistory(r.text); renderHistory();
+      localHint = `\n\nKết quả từ bộ cân bằng cục bộ đã kiểm chứng bảo toàn nguyên tử: ${r.text}. Hãy dùng kết quả này khi giải thích.`;
+    } catch (_) {}
+  }
+  const prior = chatHistory.slice(-6).map(item => `${item.role === 'user' ? 'Người dùng' : 'Trợ lý'}: ${item.text}`).join('\n');
+  return `Bạn là trợ lý hóa học bằng tiếng Việt trong ứng dụng cân bằng phương trình. Trả lời rõ ràng, chính xác, phù hợp kiến thức phổ thông; không bịa phản ứng. Khi cân bằng phương trình, chỉ đổi hệ số, không đổi chỉ số. Nhắc cảnh báo an toàn nếu câu hỏi liên quan thí nghiệm nguy hiểm. Trả lời đầy đủ nhưng tránh dài dòng, thường không quá 1200 từ. Luôn kết thúc trọn câu và đóng đầy đủ mọi cặp Markdown như **chữ đậm**; không được dừng giữa câu hoặc giữa một mục danh sách.\n\nLịch sử gần đây:\n${prior || '(chưa có)'}\n\nCâu hỏi mới: ${text}${localHint}`;
+}
+
+function extractGeminiCandidate(data) {
+  const candidate = data && Array.isArray(data.candidates) ? data.candidates[0] : null;
+  const parts = candidate && candidate.content && Array.isArray(candidate.content.parts)
+    ? candidate.content.parts
+    : [];
+  return {
+    text: parts.map(part => typeof part.text === 'string' ? part.text : '').join('\n').trim(),
+    finishReason: candidate && candidate.finishReason ? String(candidate.finishReason) : '',
+    finishMessage: candidate && candidate.finishMessage ? String(candidate.finishMessage) : ''
+  };
+}
+
+function mergeContinuation(previous, continuation) {
+  const left = String(previous || '').trimEnd();
+  const right = String(continuation || '').trimStart();
+  if (!left) return right;
+  if (!right) return left;
+
+  // Gemini đôi khi lặp lại vài từ đầu khi được yêu cầu viết tiếp. Loại bỏ phần
+  // trùng ở ranh giới để câu trả lời ghép lại tự nhiên.
+  const maxOverlap = Math.min(260, left.length, right.length);
+  for (let size = maxOverlap; size >= 12; size--) {
+    if (left.slice(-size) === right.slice(0, size)) {
+      return left + right.slice(size);
+    }
+  }
+  const separator = /[\s\n]$/.test(left) || /^[,.;:!?)]/.test(right) ? '' : '\n';
+  return left + separator + right;
+}
+
+function buildGeminiContents(text, accumulated = '') {
+  const contents = [{ role: 'user', parts: [{ text: buildGeminiPrompt(text) }] }];
+  if (accumulated) {
+    contents.push({ role: 'model', parts: [{ text: accumulated }] });
+    contents.push({
+      role: 'user',
+      parts: [{
+        text: 'Phản hồi trên đã chạm giới hạn độ dài. Hãy viết tiếp chính xác từ chỗ bị dừng, chỉ bổ sung phần còn thiếu, không lặp lại phần đã có, không mở đầu lại, và kết thúc câu trả lời hoàn chỉnh.'
+      }]
+    });
+  }
+  return contents;
+}
+
+async function requestGeminiChunk(model, text, accumulated = '') {
+  const apiKey = getApiKey();
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timer = controller ? setTimeout(() => controller.abort(), 45000) : null;
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+      body: JSON.stringify({
+        contents: buildGeminiContents(text, accumulated),
+        generationConfig: { temperature: 0.25, maxOutputTokens: 4096 }
+      }),
+      signal: controller ? controller.signal : undefined
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error?.message || `HTTP ${response.status}`);
+    return extractGeminiCandidate(data);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+async function requestGemini(text) {
+  const apiKey = getApiKey();
+  if (!apiKey) throw new Error('Chưa có Gemini API key');
+  let lastError = null;
+
+  for (const model of GEMINI_MODELS) {
+    try {
+      let answer = '';
+      let finishReason = '';
+
+      // Một lượt chính và tối đa hai lượt nối tiếp khi API báo MAX_TOKENS.
+      for (let partIndex = 0; partIndex < 3; partIndex++) {
+        const result = await requestGeminiChunk(model, text, answer);
+        if (!result.text) {
+          throw new Error(result.finishMessage || 'Gemini không trả về nội dung');
+        }
+        answer = mergeContinuation(answer, result.text);
+        finishReason = result.finishReason;
+        if (finishReason !== 'MAX_TOKENS') break;
+      }
+
+      if (!answer) throw new Error('Gemini không trả về nội dung');
+      if (finishReason === 'MAX_TOKENS') {
+        answer = `${answer.trimEnd()}\n\n[Phản hồi quá dài nên đã dừng sau nhiều lần nối tiếp.]`;
+      }
+      return answer;
+    } catch (error) {
+      lastError = error;
+      const message = String(error && error.message || error);
+      const modelMissing = /404|not found|not supported/i.test(message);
+      if (!modelMissing) break;
+    }
+  }
+  throw lastError || new Error('Không thể kết nối Gemini');
+}
+
+async function sendChat(text = chatInput.value) {
+  text = text.trim(); if (!text) return;
+  addMessage(text, 'user'); chatInput.value = '';
+  chatHistory.push({ role: 'user', text });
+  const typing = addMessage('Chatbot đang suy nghĩ...', 'bot', 'typing');
+  let answer;
+
+  // Never ask the online model to "balance" a locally recognized impossible
+  // reaction. This keeps online and offline behavior consistent.
+  if (containsEquation(text)) {
+    try {
+      balanceChemicalEquation(text);
+    } catch (error) {
+      if (error && error.name === 'ReactionFeasibilityError') {
+        typing.remove();
+        answer = error.message;
+        addMessage(answer, 'bot');
+        chatHistory.push({ role: 'assistant', text: answer });
+        return;
+      }
+    }
+  }
+
+  if (navigator.onLine && getApiKey()) {
+    try {
+      answer = await requestGemini(text);
+      setChatMode('● Gemini trực tuyến · tự động dự phòng offline');
+    } catch (error) {
+      answer = `${offlineBotReply(text)}\n\n[Đã chuyển sang ngoại tuyến vì Gemini không khả dụng: ${error.message || error}]`;
+      setChatMode('● Gemini lỗi · đang dùng chatbot ngoại tuyến', 'error');
+    }
+  } else {
+    answer = offlineBotReply(text);
+    refreshChatMode();
+  }
+  typing.remove();
+  addMessage(answer, 'bot');
+  chatHistory.push({ role: 'assistant', text: answer });
+}
+
+document.getElementById('sendBtn').addEventListener('click', () => sendChat());
+chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+document.querySelectorAll('.prompt').forEach(btn => btn.addEventListener('click', () => sendChat(btn.textContent)));
+
+document.getElementById('settingsToggle').addEventListener('click', () => {
+  apiSettings.classList.toggle('show');
+  if (apiSettings.classList.contains('show')) apiKeyInput.focus();
+});
+document.getElementById('saveApiKey').addEventListener('click', () => {
+  const key = apiKeyInput.value.trim();
+  if (!key) {
+    localStorage.removeItem('gemini_api_key');
+    if (window.Android && Android.toast) Android.toast('Đã chuyển sang chế độ ngoại tuyến');
+  } else {
+    localStorage.setItem('gemini_api_key', key);
+    if (window.Android && Android.toast) Android.toast('Đã lưu API key trên thiết bị');
+  }
+  refreshChatMode();
+});
+document.getElementById('removeApiKey').addEventListener('click', () => {
+  localStorage.removeItem('gemini_api_key'); apiKeyInput.value = ''; refreshChatMode();
+});
+document.getElementById('toggleApiKey').addEventListener('click', () => {
+  apiKeyInput.type = apiKeyInput.type === 'password' ? 'text' : 'password';
+});
+window.addEventListener('online', refreshChatMode);
+window.addEventListener('offline', refreshChatMode);
+
+apiKeyInput.value = getApiKey();
+refreshChatMode();
+renderHistory();
+
+</script>
+</body>
+</html>
