@@ -290,7 +290,7 @@ def build_axml():
         if s not in strings: strings.append(s)
         return strings.index(s)
     for name in ATTR_IDS: add(name)
-    for s in [ANDROID_PREFIX,ANDROID_URI,'manifest','package','com.example.chembalanceai','1.2.5',
+    for s in [ANDROID_PREFIX,ANDROID_URI,'manifest','package','com.example.chembalanceai','1.2.7',
               'uses-permission','android.permission.INTERNET','android.permission.ACCESS_NETWORK_STATE',
               'uses-sdk','application','Chemistry balance','activity',
               'com.example.chembalanceai.MainActivity','intent-filter','action',
@@ -325,8 +325,8 @@ def build_axml():
     # manifest
     chunks += start('manifest',[
         (NO_INDEX,'package',idx['com.example.chembalanceai'],TYPE_STRING,idx['com.example.chembalanceai']),
-        (A,'versionCode',NO_INDEX,TYPE_INT_DEC,8),
-        (A,'versionName',idx['1.2.5'],TYPE_STRING,idx['1.2.5']),
+        (A,'versionCode',NO_INDEX,TYPE_INT_DEC,10),
+        (A,'versionName',idx['1.2.7'],TYPE_STRING,idx['1.2.7']),
     ])
     chunks += start('uses-permission',[(A,'name',idx['android.permission.INTERNET'],TYPE_STRING,idx['android.permission.INTERNET'])])
     chunks += end('uses-permission')
@@ -334,7 +334,7 @@ def build_axml():
     chunks += end('uses-permission')
     chunks += start('uses-sdk',[
         (A,'minSdkVersion',NO_INDEX,TYPE_INT_DEC,23),
-        (A,'targetSdkVersion',NO_INDEX,TYPE_INT_DEC,28),
+        (A,'targetSdkVersion',NO_INDEX,TYPE_INT_DEC,35),
     ])
     chunks += end('uses-sdk')
     chunks += start('application',[
@@ -434,7 +434,7 @@ if not keystore.exists():
         '-alias','androiddebugkey','-keypass','android','-keyalg','RSA','-keysize','2048',
         '-validity','10000','-dname','CN=Android Debug,O=ChemistryBalance,C=VN'
     ],check=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
-final=OUT/'Chemistry-balance-v1.2.5.apk'
+final=OUT/'Chemistry-balance-v1.2.7.apk'
 shutil.copy2(unsigned,final)
 subprocess.run([
     'jarsigner','-keystore',str(keystore),'-storepass','android','-keypass','android',
