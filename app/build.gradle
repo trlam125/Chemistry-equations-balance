@@ -2,6 +2,33 @@ plugins {
     id 'com.android.application'
 }
 
+
+// Release builds must use one persistent keystore. Copy
+// keystore.properties.example to keystore.properties and keep the real file
+// and keystore outside version control.
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withInputStream { stream ->
+        keystoreProperties.load(stream)
+    }
+}
+
+def requiredSigningKeys = ['storeFile', 'storePassword', 'keyAlias', 'keyPassword']
+def hasReleaseSigning = requiredSigningKeys.every { key ->
+    keystoreProperties.getProperty(key)?.trim()
+}
+def releaseTaskRequested = gradle.startParameter.taskNames.any { taskName ->
+    taskName.toLowerCase().contains('release')
+}
+
+if (releaseTaskRequested && !hasReleaseSigning) {
+    throw new GradleException(
+        'Release signing is not configured. Copy keystore.properties.example ' +
+        'to keystore.properties and enter the path/passwords for your persistent release keystore.'
+    )
+}
+
 android {
     namespace 'com.example.chembalanceai'
     compileSdk 35
@@ -10,14 +37,37 @@ android {
         applicationId 'com.example.chembalanceai'
         minSdk 23
         targetSdk 35
-        versionCode 10
-        versionName '1.2.7'
+        versionCode 19
+        versionName '1.4.2'
+    }
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            release {
+                storeFile rootProject.file(keystoreProperties.getProperty('storeFile'))
+                storePassword keystoreProperties.getProperty('storePassword')
+                keyAlias keystoreProperties.getProperty('keyAlias')
+                keyPassword keystoreProperties.getProperty('keyPassword')
+                enableV1Signing true
+                enableV2Signing true
+                enableV3Signing true
+                enableV4Signing true
+            }
+        }
     }
 
     buildTypes {
+        debug {
+            // Android's normal debug signing is intentionally used only for
+            // local testing. It must never be distributed as an update.
+            versionNameSuffix '-debug'
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }

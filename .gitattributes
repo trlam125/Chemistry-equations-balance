@@ -40,5 +40,4 @@
 *.pdf binary
 
 # Improve GitHub language statistics for generated/build helper files.
-dist/** linguist-generated=true
 tests/test_results_*.txt linguist-generated=true
