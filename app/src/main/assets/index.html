@@ -76,7 +76,7 @@
     body { padding-bottom: max(18px, env(safe-area-inset-bottom)); }
     button, input, textarea { font: inherit; }
     button { cursor: pointer; border: 0; background: transparent; }
-    
+
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(16px); }
       to { opacity: 1; transform: translateY(0); }
@@ -86,7 +86,7 @@
       70% { box-shadow: 0 0 0 12px rgba(20, 184, 166, 0); }
       100% { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0); }
     }
-    
+
     .app {
       max-width: 760px;
       margin: 0 auto;
@@ -576,7 +576,15 @@
     .bot-avatar { width: 44px; height: 44px; border-radius: var(--radius-sm); background: var(--primary-soft); display: grid; place-items: center; font-size: 22px; box-shadow: 0 4px 10px var(--primary-glow); }
     .chat-title { flex: 1; min-width: 0; }
     .chat-head strong { display: block; font-size: 15px; color: var(--text); font-weight: 800; }
-    .online { color: var(--success); font-size: 11.5px; margin-top: 3px; font-weight: 600; }
+    .online {
+      color: var(--success);
+      font-size: 11.5px;
+      line-height: 1.35;
+      margin-top: 3px;
+      font-weight: 600;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
     .online.offline { color: var(--muted); }
     .online.error { color: var(--danger); }
     
@@ -875,18 +883,93 @@
       text-align: center;
       color: var(--text);
       box-shadow: 0 2px 5px rgba(0,0,0,0.01);
-      transition: transform .2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .2s ease, filter .2s ease, border-color 0.2s ease, background 0.3s ease;
+      transition: transform .2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .2s ease, border-color .2s ease, background-color .2s ease;
+      will-change: transform;
     }
     button.periodic-cell { font: inherit; cursor: pointer; }
-    .periodic-cell:hover, .periodic-cell:focus-visible, .periodic-cell.selected {
-      transform: translateY(-4px) scale(1.06);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.12);
-      z-index: 4;
-      outline: 2px solid var(--primary);
-      outline-offset: 1px;
+
+    /* Neon Glow Effect on Hover & Focus */
+    .periodic-cell:hover, .periodic-cell:focus-visible {
+      transform: translateY(-5px) scale(1.08);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.18), 0 0 14px var(--cat-glow), inset 0 0 6px var(--cat-glow);
+      border-color: var(--cat-glow);
+      z-index: 10;
+      outline: none;
     }
+    .periodic-cell:hover .sym, .periodic-cell:focus-visible .sym {
+      text-shadow: 0 0 8px var(--cat-glow);
+    }
+
+    /* Neon Glow Effect on Selected Cell with Rotating Border Beam */
+    .periodic-cell.selected {
+      transform: translateY(-5px) scale(1.1);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.25), 0 0 20px var(--cat-glow);
+      border-color: transparent;
+      z-index: 12;
+      overflow: hidden;
+    }
+    .periodic-cell.selected::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(
+        from 0deg,
+        transparent 0%,
+        var(--cat-glow) 25%,
+        #ffffff 50%,
+        var(--cat-glow) 75%,
+        transparent 100%
+      );
+      animation: neonBorderRotate 2.5s linear infinite;
+      z-index: 1;
+    }
+    .periodic-cell.selected::after {
+      content: '';
+      position: absolute;
+      inset: 2px;
+      border-radius: 8px;
+      background: var(--card-solid);
+      z-index: 2;
+    }
+    .periodic-cell.selected.cat-alkali::after     { background: rgba(254, 202, 202, 0.92); }
+    .periodic-cell.selected.cat-alkaline::after   { background: rgba(254, 215, 170, 0.92); }
+    .periodic-cell.selected.cat-transition::after { background: rgba(253, 230, 138, 0.92); }
+    .periodic-cell.selected.cat-post::after       { background: rgba(217, 249, 157, 0.92); }
+    .periodic-cell.selected.cat-metalloid::after  { background: rgba(167, 243, 208, 0.92); }
+    .periodic-cell.selected.cat-nonmetal::after   { background: rgba(191, 219, 254, 0.92); }
+    .periodic-cell.selected.cat-halogen::after    { background: rgba(199, 210, 254, 0.92); }
+    .periodic-cell.selected.cat-noble::after      { background: rgba(221, 214, 254, 0.92); }
+    .periodic-cell.selected.cat-lanthanide::after { background: rgba(251, 207, 232, 0.92); }
+    .periodic-cell.selected.cat-actinide::after   { background: rgba(245, 208, 254, 0.92); }
+    .periodic-cell.selected.cat-other::after      { background: rgba(226, 232, 240, 0.92); }
+
+    [data-theme="dark"] .periodic-cell.selected.cat-alkali::after     { background: #3b1111; }
+    [data-theme="dark"] .periodic-cell.selected.cat-alkaline::after   { background: #3b1d0a; }
+    [data-theme="dark"] .periodic-cell.selected.cat-transition::after { background: #33230a; }
+    [data-theme="dark"] .periodic-cell.selected.cat-post::after       { background: #20330a; }
+    [data-theme="dark"] .periodic-cell.selected.cat-metalloid::after  { background: #0a2920; }
+    [data-theme="dark"] .periodic-cell.selected.cat-nonmetal::after   { background: #0c1a3b; }
+    [data-theme="dark"] .periodic-cell.selected.cat-halogen::after    { background: #13123b; }
+    [data-theme="dark"] .periodic-cell.selected.cat-noble::after      { background: #1c0c3b; }
+    [data-theme="dark"] .periodic-cell.selected.cat-lanthanide::after { background: #3b0c23; }
+    [data-theme="dark"] .periodic-cell.selected.cat-actinide::after   { background: #350c3b; }
+    [data-theme="dark"] .periodic-cell.selected.cat-other::after      { background: #1f2937; }
+
+    .periodic-cell.selected .z { position: absolute; left: 6px; top: 5px; font-size: 8.5px; font-weight: 800; opacity: .85; z-index: 3; }
+    .periodic-cell.selected .sym { display: block; margin-top: 10px; font-size: 18px; line-height: 1; font-weight: 900; text-shadow: 0 0 10px var(--cat-glow); position: relative; z-index: 3; }
+    .periodic-cell.selected .ename { display: block; margin-top: 4px; font-size: 7.5px; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; position: relative; z-index: 3; }
+    .periodic-cell.selected .mass { display: block; margin-top: 2px; font-size: 7px; opacity: .85; position: relative; z-index: 3; }
+
+    @keyframes neonBorderRotate {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
     .periodic-cell .z { position: absolute; left: 6px; top: 5px; font-size: 8.5px; font-weight: 800; opacity: .75; }
-    .periodic-cell .sym { display: block; margin-top: 10px; font-size: 18px; line-height: 1; font-weight: 900; }
+    .periodic-cell .sym { display: block; margin-top: 10px; font-size: 18px; line-height: 1; font-weight: 900; transition: text-shadow 0.2s ease; }
     .periodic-cell .ename { display: block; margin-top: 4px; font-size: 7.5px; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .periodic-cell .mass { display: block; margin-top: 2px; font-size: 7px; opacity: .75; }
     .periodic-placeholder {
@@ -906,32 +989,34 @@
     .periodic-label { align-self: center; color: var(--muted); font-size: 9.5px; font-weight: 800; padding-left: 4px; }
     .periodic-legend { display: flex; flex-wrap: wrap; gap: 7px 10px; margin: 12px 0 8px; }
     .legend-item { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 700; }
-    .legend-dot { width: 12px; height: 12px; border-radius: 4px; border: 1px solid var(--border-color); }
+    .legend-dot { width: 12px; height: 12px; border-radius: 4px; border: 1px solid var(--border-color); transition: box-shadow 0.2s ease, border-color 0.2s ease; }
+    .legend-item:hover .legend-dot { box-shadow: 0 0 8px var(--cat-glow); border-color: var(--cat-glow); }
     
-    /* Category colors */
-    .cat-alkali { background: rgba(254, 202, 202, 0.65); border-color: #fca5a5; }
-    .cat-alkaline { background: rgba(254, 215, 170, 0.65); border-color: #fdba74; }
-    .cat-transition { background: rgba(253, 230, 138, 0.65); border-color: #fde047; }
-    .cat-post { background: rgba(217, 249, 157, 0.65); border-color: #bef264; }
-    .cat-metalloid { background: rgba(167, 243, 208, 0.65); border-color: #6ee7b7; }
-    .cat-nonmetal { background: rgba(191, 219, 254, 0.65); border-color: #93c5fd; }
-    .cat-halogen { background: rgba(199, 210, 254, 0.65); border-color: #a5b4fc; }
-    .cat-noble { background: rgba(221, 214, 254, 0.65); border-color: #c4b5fd; }
-    .cat-lanthanide { background: rgba(251, 207, 232, 0.65); border-color: #fbcfe8; }
-    .cat-actinide { background: rgba(245, 208, 254, 0.65); border-color: #f5d0fe; }
-    .cat-other { background: rgba(226, 232, 240, 0.65); border-color: #cbd5e1; }
+    /* Category colors & Neon Glow Variables (Light Mode) */
+    .cat-alkali     { --cat-glow: #f87171; background: rgba(254, 202, 202, 0.65); border-color: #fca5a5; }
+    .cat-alkaline   { --cat-glow: #fb923c; background: rgba(254, 215, 170, 0.65); border-color: #fdba74; }
+    .cat-transition { --cat-glow: #eab308; background: rgba(253, 230, 138, 0.65); border-color: #fde047; }
+    .cat-post       { --cat-glow: #84cc16; background: rgba(217, 249, 157, 0.65); border-color: #bef264; }
+    .cat-metalloid  { --cat-glow: #10b981; background: rgba(167, 243, 208, 0.65); border-color: #6ee7b7; }
+    .cat-nonmetal   { --cat-glow: #3b82f6; background: rgba(191, 219, 254, 0.65); border-color: #93c5fd; }
+    .cat-halogen    { --cat-glow: #6366f1; background: rgba(199, 210, 254, 0.65); border-color: #a5b4fc; }
+    .cat-noble      { --cat-glow: #8b5cf6; background: rgba(221, 214, 254, 0.65); border-color: #c4b5fd; }
+    .cat-lanthanide { --cat-glow: #ec4899; background: rgba(251, 207, 232, 0.65); border-color: #fbcfe8; }
+    .cat-actinide   { --cat-glow: #d946ef; background: rgba(245, 208, 254, 0.65); border-color: #f5d0fe; }
+    .cat-other      { --cat-glow: #94a3b8; background: rgba(226, 232, 240, 0.65); border-color: #cbd5e1; }
 
-    [data-theme="dark"] .cat-alkali { background: rgba(153, 27, 27, 0.35); border-color: #ef4444; color: #fee2e2; }
-    [data-theme="dark"] .cat-alkaline { background: rgba(154, 52, 0, 0.35); border-color: #f97316; color: #ffedd5; }
-    [data-theme="dark"] .cat-transition { background: rgba(133, 77, 14, 0.35); border-color: #eab308; color: #fef9c3; }
-    [data-theme="dark"] .cat-post { background: rgba(77, 124, 15, 0.35); border-color: #84cc16; color: #ecfccb; }
-    [data-theme="dark"] .cat-metalloid { background: rgba(6, 95, 70, 0.35); border-color: #10b981; color: #d1fae5; }
-    [data-theme="dark"] .cat-nonmetal { background: rgba(30, 58, 138, 0.35); border-color: #3b82f6; color: #dbeafe; }
-    [data-theme="dark"] .cat-halogen { background: rgba(55, 48, 163, 0.35); border-color: #6366f1; color: #e0e7ff; }
-    [data-theme="dark"] .cat-noble { background: rgba(76, 29, 149, 0.35); border-color: #8b5cf6; color: #ede9fe; }
-    [data-theme="dark"] .cat-lanthanide { background: rgba(157, 23, 77, 0.35); border-color: #ec4899; color: #fce7f3; }
-    [data-theme="dark"] .cat-actinide { background: rgba(134, 25, 143, 0.35); border-color: #d946ef; color: #fdf4ff; }
-    [data-theme="dark"] .cat-other { background: rgba(31, 41, 55, 0.5); border-color: #4b5563; color: #f3f4f6; }
+    /* Category colors & Neon Glow Variables (Dark Mode) */
+    [data-theme="dark"] .cat-alkali     { --cat-glow: #ff4d4d; background: rgba(153, 27, 27, 0.35); border-color: #ef4444; color: #fee2e2; }
+    [data-theme="dark"] .cat-alkaline   { --cat-glow: #ff8533; background: rgba(154, 52, 0, 0.35); border-color: #f97316; color: #ffedd5; }
+    [data-theme="dark"] .cat-transition { --cat-glow: #ffcc00; background: rgba(133, 77, 14, 0.35); border-color: #eab308; color: #fef9c3; }
+    [data-theme="dark"] .cat-post       { --cat-glow: #99e600; background: rgba(77, 124, 15, 0.35); border-color: #84cc16; color: #ecfccb; }
+    [data-theme="dark"] .cat-metalloid  { --cat-glow: #00e699; background: rgba(6, 95, 70, 0.35); border-color: #10b981; color: #d1fae5; }
+    [data-theme="dark"] .cat-nonmetal   { --cat-glow: #3385ff; background: rgba(30, 58, 138, 0.35); border-color: #3b82f6; color: #dbeafe; }
+    [data-theme="dark"] .cat-halogen    { --cat-glow: #7075ff; background: rgba(55, 48, 163, 0.35); border-color: #6366f1; color: #e0e7ff; }
+    [data-theme="dark"] .cat-noble      { --cat-glow: #9d66ff; background: rgba(76, 29, 149, 0.35); border-color: #8b5cf6; color: #ede9fe; }
+    [data-theme="dark"] .cat-lanthanide { --cat-glow: #ff59ac; background: rgba(157, 23, 77, 0.35); border-color: #ec4899; color: #fce7f3; }
+    [data-theme="dark"] .cat-actinide   { --cat-glow: #e600e6; background: rgba(134, 25, 143, 0.35); border-color: #d946ef; color: #fdf4ff; }
+    [data-theme="dark"] .cat-other      { --cat-glow: #94a3b8; background: rgba(31, 41, 55, 0.5); border-color: #4b5563; color: #f3f4f6; }
 
     /* ---------- Floating Chemistry Assistant ---------- */
     .chat-fab {
@@ -3391,18 +3476,22 @@ const apiSettings = document.getElementById('apiSettings');
 const apiKeyInput = document.getElementById('apiKeyInput');
 const apiStatus = document.getElementById('apiStatus');
 const GEMINI_MODEL_PREFERENCES = [
-  // Ưu tiên các model ổn định, tiết kiệm và thường khả dụng với khóa AI Studio.
-  'gemini-2.5-flash-lite',
-  'gemini-2.5-flash',
-  'gemini-3.1-flash-lite',
+  // Chỉ dùng khi endpoint liệt kê model tạm thời không truy cập được.
+  // Khi endpoint hoạt động, thứ tự được tính động từ các model mà API key nhìn thấy.
+  'gemini-3.6-flash',
   'gemini-3.5-flash',
-  'gemini-flash-latest'
+  'gemini-3.5-flash-lite',
+  'gemini-flash-latest',
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite'
 ];
 const GEMINI_RETRIES_PER_MODEL = 1;
 const GEMINI_MODEL_LIST_TIMEOUT_MS = 7000;
 const GEMINI_REQUEST_TIMEOUT_MS = 25000;
 const GEMINI_MODEL_CACHE_MS = 10 * 60 * 1000;
 const GEMINI_MODEL_FALLBACK_CACHE_MS = 60 * 1000;
+const MAX_CHAT_HISTORY_ITEMS = 20;
+const MAX_CHAT_DOM_MESSAGES = 60;
 let geminiModelCache = { apiKey: '', expiresAt: 0, models: [] };
 const nativeGeminiRequests = new Map();
 let nativeGeminiRequestCounter = 0;
@@ -3492,8 +3581,17 @@ function addMessage(text, who = 'bot', extraClass = '') {
   if (who === 'bot' && extraClass !== 'typing') bubble.innerHTML = renderMarkdown(text);
   else bubble.textContent = text;
   div.appendChild(bubble); messages.appendChild(div);
+  while (messages.children.length > MAX_CHAT_DOM_MESSAGES) {
+    messages.firstElementChild.remove();
+  }
   messages.scrollTop = messages.scrollHeight;
   return div;
+}
+
+function trimChatHistory() {
+  if (chatHistory.length > MAX_CHAT_HISTORY_ITEMS) {
+    chatHistory.splice(0, chatHistory.length - MAX_CHAT_HISTORY_ITEMS);
+  }
 }
 
 function getApiKey() { return localStorage.getItem('gemini_api_key') || ''; }
@@ -3745,32 +3843,73 @@ function isModelAccessError(error) {
 }
 
 function isFatalGeminiError(error) {
-  const status = Number(error && error.status) || 0;
-  return status === 400 || isApiKeyAuthenticationError(error);
+  return isApiKeyAuthenticationError(error);
 }
 
-function isTextFlashModel(model) {
+function isGeminiTextModel(model) {
   const name = String(model || '').replace(/^models\//, '');
-  return /^gemini-/i.test(name) && /flash/i.test(name) &&
+  return /^gemini-/i.test(name) &&
     !/(image|imagen|veo|lyria|tts|live|embedding|robotics|computer-use|deep-research|nano-banana|omni)/i.test(name);
 }
 
 function sortGeminiModels(models) {
-  const unique = [...new Set(models.map(name => String(name).replace(/^models\//, '')).filter(Boolean))];
-  const preferenceIndex = new Map(GEMINI_MODEL_PREFERENCES.map((name, index) => [name, index]));
-  return unique.sort((a, b) => {
-    const pa = preferenceIndex.has(a) ? preferenceIndex.get(a) : 100;
-    const pb = preferenceIndex.has(b) ? preferenceIndex.get(b) : 100;
-    if (pa !== pb) return pa - pb;
-    const score = name => {
-      let value = 0;
-      if (/flash-lite/i.test(name)) value += 10;
-      if (/latest/i.test(name)) value += 20;
-      if (/preview|experimental/i.test(name)) value += 30;
-      return value;
-    };
-    return score(a) - score(b) || a.localeCompare(b);
+  const byName = new Map();
+  models.forEach(model => {
+    const record = typeof model === 'string' ? { name: model } : (model || {});
+    const name = String(record.name || record.baseModelId || '').replace(/^models\//, '');
+    if (name && !byName.has(name)) byName.set(name, { ...record, name });
   });
+
+  const rank = model => {
+    const searchable = `${model.name || ''} ${model.baseModelId || ''} ${model.version || ''} ${model.displayName || ''}`;
+    const familyMatch = searchable.match(/gemini[\s-]+(\d+)(?:\.(\d+))?/i);
+    const major = familyMatch ? Number(familyMatch[1]) : 0;
+    const minor = familyMatch ? Number(familyMatch[2] || 0) : 0;
+    const latestAlias = /(?:^|-)latest(?:-|$)/i.test(model.name);
+    const stable = !/(preview|experimental|exp\b)/i.test(searchable);
+    const monthYear = searchable.match(/(?:preview|experimental|exp)[-_](\d{1,2})[-_](20\d{2})/i);
+    const yearMonth = searchable.match(/(20\d{2})[-_](\d{1,2})(?:\D|$)/);
+    const numberedRevision = String(model.version || '').match(/^0*(\d+)$/);
+    const nameRevision = model.name.match(/-(\d{3})$/);
+    let releaseOrder = numberedRevision ? Number(numberedRevision[1]) : (nameRevision ? Number(nameRevision[1]) : 0);
+    if (monthYear) releaseOrder = Number(monthYear[2]) * 100 + Number(monthYear[1]);
+    else if (yearMonth) releaseOrder = Number(yearMonth[1]) * 100 + Number(yearMonth[2]);
+    let tier = 0;
+    if (/\bpro\b/i.test(searchable)) tier = 3;
+    else if (/flash(?!-lite)/i.test(searchable)) tier = 2;
+    else if (/flash-lite/i.test(searchable)) tier = 1;
+    return { major, minor, stable, tier, releaseOrder, latestAlias };
+  };
+
+  const ranked = [...byName.values()].map(model => ({ model, rank: rank(model) }));
+  const concreteRanks = ranked.filter(item => !item.rank.latestAlias && item.rank.major > 0);
+  const newestForTier = tier => concreteRanks
+    .filter(item => item.rank.tier === tier)
+    .sort((a, b) => b.rank.major - a.rank.major || b.rank.minor - a.rank.minor)[0]?.rank;
+  const newestOverall = concreteRanks
+    .slice()
+    .sort((a, b) => b.rank.major - a.rank.major || b.rank.minor - a.rank.minor)[0]?.rank;
+
+  ranked.forEach(item => {
+    if (!item.rank.latestAlias || item.rank.major > 0) return;
+    const inferred = newestForTier(item.rank.tier) || newestOverall;
+    if (inferred) {
+      item.rank.major = inferred.major;
+      item.rank.minor = inferred.minor;
+    }
+  });
+
+  return ranked.sort((a, b) => {
+    const ra = a.rank;
+    const rb = b.rank;
+    return rb.major - ra.major ||
+      rb.minor - ra.minor ||
+      Number(rb.stable) - Number(ra.stable) ||
+      rb.tier - ra.tier ||
+      rb.releaseOrder - ra.releaseOrder ||
+      Number(ra.latestAlias) - Number(rb.latestAlias) ||
+      a.model.name.localeCompare(b.model.name);
+  }).map(item => item.model.name);
 }
 
 async function fetchAvailableGeminiModels() {
@@ -3794,13 +3933,10 @@ async function fetchAvailableGeminiModels() {
 
     const available = Array.isArray(data.models) ? data.models
       .filter(model => Array.isArray(model.supportedGenerationMethods) && model.supportedGenerationMethods.includes('generateContent'))
-      .map(model => model.name || model.baseModelId || '')
-      .filter(isTextFlashModel) : [];
+      .filter(model => isGeminiTextModel(model.name || model.baseModelId || '')) : [];
 
-    const availableSet = new Set(available.map(name => String(name).replace(/^models\//, '')));
-    const preferredAvailable = GEMINI_MODEL_PREFERENCES.filter(name => availableSet.has(name));
-    const candidates = sortGeminiModels([...preferredAvailable, ...available]);
-    const models = candidates.length ? candidates.slice(0, 8) : GEMINI_MODEL_PREFERENCES.slice();
+    const candidates = sortGeminiModels(available);
+    const models = candidates.length ? candidates : GEMINI_MODEL_PREFERENCES.slice();
     geminiModelCache = { apiKey, expiresAt: Date.now() + GEMINI_MODEL_CACHE_MS, models: models.slice() };
     return models;
   } catch (error) {
@@ -3873,7 +4009,8 @@ async function requestGemini(text, onStatus = () => {}) {
         lastError = error;
         const unavailable = isModelUnavailableError(error);
         const modelAccess = isModelAccessError(error);
-        if (unavailable || modelAccess) break;
+        const modelRejectedRequest = Number(error && error.status) === 400 && !isApiKeyAuthenticationError(error);
+        if (unavailable || modelAccess || modelRejectedRequest) break;
         if (isFatalGeminiError(error)) throw error;
 
         const connection = isConnectionGeminiError(error);
@@ -3966,6 +4103,7 @@ async function sendChat(text = chatInput.value) {
   addMessage(text, 'user');
   chatInput.value = '';
   chatHistory.push({ role: 'user', text });
+  trimChatHistory();
   setChatBusy(true);
   const typing = addMessage('Chatbot đang suy nghĩ...', 'bot', 'typing');
   let answer = '';
@@ -3990,7 +4128,7 @@ async function sendChat(text = chatInput.value) {
           // thanh trạng thái chỉ hiển thị model kế tiếp đang được sử dụng.
           if (status.type === 'retry') return;
           const name = modelDisplayName(status.model);
-          setChatMode(`● Đang dùng ${name}...`);
+          setChatMode(`● Đang dùng ${name}`);
         });
         answer = geminiResult.answer;
         if (localEquationResult) {
@@ -4018,6 +4156,7 @@ _${feedback.note}_`;
 
   addMessage(answer, 'bot');
   chatHistory.push({ role: 'assistant', text: answer });
+  trimChatHistory();
 }
 
 sendBtn.addEventListener('click', () => sendChat());

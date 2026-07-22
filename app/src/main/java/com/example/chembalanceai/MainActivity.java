@@ -31,9 +31,13 @@ import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -378,9 +382,30 @@ public class MainActivity extends Activity {
             if (value == null) {
                 return 0L;
             }
+            String normalized = value.trim();
             try {
-                return Math.max(0L, Long.parseLong(value.trim())) * 1000L;
+                long seconds = Math.max(0L, Long.parseLong(normalized));
+                return seconds > Long.MAX_VALUE / 1000L ? Long.MAX_VALUE : seconds * 1000L;
             } catch (NumberFormatException ignored) {
+                // Retry-After also permits an HTTP date. Servers normally use
+                // RFC 1123, while the two older formats remain valid HTTP-date
+                // representations and are inexpensive to support here.
+                String[] formats = {
+                        "EEE, dd MMM yyyy HH:mm:ss zzz",
+                        "EEEE, dd-MMM-yy HH:mm:ss zzz",
+                        "EEE MMM d HH:mm:ss yyyy"
+                };
+                for (String pattern : formats) {
+                    SimpleDateFormat parser = new SimpleDateFormat(pattern, Locale.US);
+                    parser.setLenient(false);
+                    parser.setTimeZone(TimeZone.getTimeZone("GMT"));
+                    try {
+                        Date retryAt = parser.parse(normalized);
+                        return retryAt == null ? 0L : Math.max(0L, retryAt.getTime() - System.currentTimeMillis());
+                    } catch (ParseException ignoredDate) {
+                        // Try the next HTTP-date representation.
+                    }
+                }
                 return 0L;
             }
         }
